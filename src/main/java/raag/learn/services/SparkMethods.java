@@ -9,7 +9,7 @@ import raag.learn.creation.SessionCreate;
 import raag.learn.utility.FilePathConstant;
 
 import javax.xml.crypto.Data;
-import org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.functions.desc;
 
 public class SparkMethods {
 
@@ -23,6 +23,7 @@ public class SparkMethods {
 //        sparkMethods.sort(sparkSession);
 //        sparkMethods.getNumPartitions(flightDataset);
 //        sparkMethods.explainPlan(sparkSession);
+        sparkMethods.descMethod(flightDataset);
     }
 
     /**
@@ -40,7 +41,7 @@ public class SparkMethods {
      * sort(colStrings)
      * sort the dataset for the given columns string
      * sort(Columns)
-     * sort the dataset for the given columns and can apply the sortBy order for each specific columne
+     * sort the dataset for the given columns and can apply the sortBy order for each specific column
      */
     public void sort(SparkSession sparkSession) {
         Dataset<Row> numberDataset = sparkSession.range(1000).toDF("number");
@@ -68,5 +69,19 @@ public class SparkMethods {
      */
     public void getNumPartitions(Dataset<Row> dataset) {
         System.out.println(dataset.rdd().getNumPartitions());
+    }
+
+    /**
+     * desc("") static method used to sort in descending order
+     */
+    public void descMethod(Dataset<Row> dataset) {
+        // Before Sorting
+        dataset.show(10);
+
+        // Sorting
+        dataset = dataset.sort(desc("count"));
+
+        // After Sorting
+        dataset.show(10);
     }
 }
