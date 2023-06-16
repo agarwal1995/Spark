@@ -6,6 +6,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import raag.learn.creation.DatasetReader;
 import raag.learn.utility.FilePathConstant;
+import static org.apache.spark.sql.functions.desc;
 
 public class SparkAsSql {
     public static void main(String[] args) throws AnalysisException {
@@ -15,6 +16,7 @@ public class SparkAsSql {
         Dataset<Row> dataset = DatasetReader.readFromCSV(sparkSession,"csv", true, FilePathConstant.FLIGHT_DATA_2015_CSV.getPath(), null);
 
         sparkAsSql.groupByQuery(sparkSession, dataset);
+        sparkAsSql.findTopFiveDestinationCountryInFlightDataset(sparkSession, dataset);
     }
 
     /**
@@ -46,7 +48,16 @@ public class SparkAsSql {
         dataset.createOrReplaceTempView("flight_dataset");
 
         // sql way
-        Dataset<Row> sqlDataset = sparkSession.sql("Select DEST_COUNTRY_NAME, sum(count) as destination_total FROM flight_dataset GROUP BY DEST_COUNTRY_NAME ORDER BY Sum(count) limit 5");
+        Dataset<Row> sqlDataset = sparkSession.sql("Select DEST_COUNTRY_NAME, sum(count) as destination_total FROM flight_dataset GROUP BY DEST_COUNTRY_NAME ORDER BY Sum(count) desc limit 5");
         sqlDataset.show();
+
+        // In dataframe way
+        Dataset<Row> dfDataset = dataset
+                .groupBy("DEST_COUNTRY_NAME")
+                .sum("count")
+                .withColumnRenamed("sum(count)", "destination_total")
+                .sort(desc("destination_total"))
+                .limit(5);
+        dfDataset.show();
     }
 }
