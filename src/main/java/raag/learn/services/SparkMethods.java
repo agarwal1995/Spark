@@ -23,7 +23,7 @@ public class SparkMethods {
 //        sparkMethods.sort(sparkSession);
 //        sparkMethods.getNumPartitions(flightDataset);
 //        sparkMethods.explainPlan(sparkSession);
-        sparkMethods.descMethod(flightDataset);
+//        sparkMethods.descMethod(flightDataset);
     }
 
     /**
@@ -57,6 +57,9 @@ public class SparkMethods {
     /**
      * explain()
      * Explain the logical plan that the spark has been building up for computation/transformation
+     * -------------------------------------------------------------------------------------------
+     * dataset.col()
+     * to fetch the specific col from the dataframe
      */
     public void explainPlan(SparkSession sparkSession) {
         Dataset<Row> numberDataset = sparkSession.range(1000).toDF("number");
