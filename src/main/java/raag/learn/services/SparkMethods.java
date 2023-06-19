@@ -10,6 +10,7 @@ import raag.learn.utility.FilePathConstant;
 
 import javax.xml.crypto.Data;
 import static org.apache.spark.sql.functions.desc;
+import static org.apache.spark.sql.functions.expr;
 
 public class SparkMethods {
 
@@ -24,6 +25,8 @@ public class SparkMethods {
 //        sparkMethods.getNumPartitions(flightDataset);
 //        sparkMethods.explainPlan(sparkSession);
 //        sparkMethods.descMethod(flightDataset);
+//        sparkMethods.selectMethod(flightDataset);
+        sparkMethods.selectExprMethod(flightDataset);
     }
 
     /**
@@ -86,5 +89,31 @@ public class SparkMethods {
 
         // After Sorting
         dataset.show(10);
+    }
+
+    /**
+     * select(strings...)
+     * Select method is used to give the results equivalent to SQL select statements
+     */
+    public void selectMethod(Dataset<Row> dataset) {
+        dataset.select("DEST_COUNTRY_NAME","ORIGIN_COUNTRY_NAME").show();
+        dataset.select(dataset.col("DEST_COUNTRY_NAME")).show();
+        dataset.select(dataset.col("DEST_COUNTRY_NAME"), dataset.col("ORIGIN_COUNTRY_NAME")).show();
+
+        // It will throw error as you have to give either both all object or column strings
+//        dataset.select(dataset.col("DEST_COUNTRY_NAME"), "ORIGIN_COUNTRY_NAME").show();
+
+        // will throw error as column does not exist
+//        dataset.select(dataset.col("23")).show();
+    }
+
+    /**
+     * selectExpr is shorthand for select(expr)
+     */
+    public void selectExprMethod(Dataset<Row> dataset) {
+        dataset.select(expr("DEST_COUNTRY_NAME as DEST"), expr("ORIGIN_COUNTRY_NAME as Origin"), expr("DEST == ORIGIN as Res" )).show();
+
+        // with selectExpr shorthand
+        dataset.selectExpr("DEST_COUNTRY_NAME as DEST", "ORIGIN_COUNTRY_NAME as Origin", "DEST == ORIGIN as Result").show();
     }
 }
