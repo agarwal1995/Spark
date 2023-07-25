@@ -1,5 +1,6 @@
 package raag.learn.services;
 
+
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.Dataset;
@@ -9,6 +10,7 @@ import org.apache.spark.sql.Column;
 import scala.collection.Iterable;
 import scala.jdk.CollectionConverters;
 
+import javax.xml.crypto.Data;
 import java.util.*;
 
 /**
@@ -31,6 +33,7 @@ public class Compare2Datasets {
         secondDataSet.printSchema();
         secondDataSet.show();
 
+        joinWithoutExcludedColumns(firstDataSet, secondDataSet);
 //        joinWithAllColumns(firstDataSet, secondDataSet);
 //        joinWithSomeColumns(firstDataSet, secondDataSet);
 //        joinWithDifferentColNames(firstDataSet, secondDataSet);
@@ -54,6 +57,23 @@ public class Compare2Datasets {
         String[] cols = {"station_id","name"};
         List<String> list = Arrays.asList(cols);
         Iterable<String> scalaIterableList = CollectionConverters.IterableHasAsScala(list).asScala();
+        Dataset<Row> firstOnlyDataset = first.join(second, scalaIterableList.toSeq(), ANTI_JOIN).withColumn("PresentIn", functions.lit("Prod"));
+        Dataset<Row> secondOnlyDataset = second.join(first, scalaIterableList.toSeq(), ANTI_JOIN).withColumn("PresentIn", functions.lit("Stage"));
+        firstOnlyDataset.printSchema();
+        secondOnlyDataset.printSchema();
+        firstOnlyDataset.show();
+        secondOnlyDataset.show();
+        Dataset<Row> result = firstOnlyDataset.unionAll(secondOnlyDataset);
+        result.printSchema();
+        result.show();
+    }
+
+    public static void joinWithoutExcludedColumns(Dataset<Row> first, Dataset<Row> second) {
+        String[] colsToExclude = {"station_id", "name"};
+        List<String> list = Arrays.asList(colsToExclude);
+        Set<String> set = new HashSet<>(list);
+        String[] resultList = Arrays.stream(first.columns()).filter((str)-> !set.contains(str)).toArray(String[]::new);
+        Iterable<String> scalaIterableList = CollectionConverters.IterableHasAsScala(Arrays.asList(resultList)).asScala();
         Dataset<Row> firstOnlyDataset = first.join(second, scalaIterableList.toSeq(), ANTI_JOIN).withColumn("PresentIn", functions.lit("Prod"));
         Dataset<Row> secondOnlyDataset = second.join(first, scalaIterableList.toSeq(), ANTI_JOIN).withColumn("PresentIn", functions.lit("Stage"));
         firstOnlyDataset.printSchema();
